@@ -30,3 +30,9 @@ Thumbs.db
 
 # Claude Code local overrides (machine-specific, not shared)
 .claude/settings.local.json
+
+# Local preview / scratch artifacts (never shipped)
+_shot_*.png
+_extract/
+_verify.js
+_fav.js

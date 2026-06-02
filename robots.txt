@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://boxibi24.github.io/shippy-sheep-website/sitemap.xml
