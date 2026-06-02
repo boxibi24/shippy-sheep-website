@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shippy Sheep — Light helm & sheep options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; font-family: 'Figtree', sans-serif; }
+  .ab { background: #fff; height: 100%; box-sizing: border-box; padding: 26px; display: flex; flex-direction: column; gap: 16px; }
+  .ab-rationale { font-size: 13.5px; color: #647689; line-height: 1.5; margin: 0; }
+  .stage { background: #eef1f5; border-radius: 22px; padding: 28px; display: grid; place-items: center; }
+  .tiles { display: flex; align-items: flex-end; gap: 16px; }
+  .lbl { font-size: 12px; color: #98a6b6; font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-left: auto; align-self: center; }
+  .lock { display: flex; align-items: center; gap: 14px; border-top: 1px solid #eceff3; padding-top: 16px; }
+  .sheepbig { background: #eef2f6; border-radius: 20px; display: grid; place-items: center; padding: 18px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#fff" stroke="#1f4e79" stroke-width="3"/><circle cx="32" cy="32" r="18" fill="none" stroke="#1f4e79" stroke-width="4"/><polygon points="26,30 38,30 32,40" fill="#1f4e79"/></svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="logos3.jsx"></script>
+<script type="text/babel">
+const navySheep = (eye) => ({ wool: '#1f4e79', shade: '#3a6da0', face: '#0f2c49', eye });
+
+const LIGHTS = [
+  { id: 'lpaper', name: 'A · Paper Outline', accent: '#2f9ee0', tileBg: '#ffffff',
+    cfg: { tileBg:'#ffffff', ring:'#1f4e79', stroke:true, hub:'#ffffff', spokes:6, ringW:4.4, sheep:'faceted', sheepColors: navySheep('#ffffff') },
+    sub: 'Navy outline helm on white — crisp and neutral. The natural light counterpart to your dark “D”.' },
+  { id: 'lcream', name: 'B · Cloud Cream', accent: '#d9774b', tileBg: '#f4eddd',
+    cfg: { tileBg:'#f4eddd', ring:'#1f4e79', stroke:true, hub:'#f4eddd', spokes:6, ringW:4.4, sheep:'faceted', sheepColors: navySheep('#f4eddd') },
+    sub: 'Same outline on a warm cream tile. Softer; pairs with the cozy side of the brand.' },
+  { id: 'lbold', name: 'C · Bold Navy', accent: '#1f4e79', tileBg: '#ffffff',
+    cfg: { tileBg:'#ffffff', ring:'#1f4e79', stroke:false, hub:'#ffffff', spokes:6, ringW:5, sheep:'faceted', sheepColors: navySheep('#ffffff') },
+    sub: 'Solid navy wheel on white — heavier weight, more presence in a light UI or browser tab.' },
+];
+
+const SHEEPS = [
+  { id: 'sfaceted', name: '1 · Faceted', sheep: 'faceted', sub: 'Low-poly facets — matches the website’s house style most closely. The most “on-brand”.' },
+  { id: 'sfluffy', name: '2 · Fluffy', sheep: 'fluffy', sub: 'Soft rounded wool + ears. The warmest and most characterful — leans mascot.' },
+  { id: 'sminimal', name: '3 · Minimal', sheep: 'minimal', sub: 'A clean wool cloud with dot eyes. Reads best at the smallest sizes.' },
+  { id: 'sprofile', name: '4 · Profile', sheep: 'profile', sub: 'Side-view sheep — a more distinctive silhouette, slightly more grown-up.' },
+];
+
+function Tile({ cfg, size, flat }) {
+  return (
+    <div style={{ width: size, height: size, borderRadius: size * 0.225, background: cfg.tileBg,
+      display: 'grid', placeItems: 'center',
+      boxShadow: flat ? 'inset 0 0 0 1px rgba(20,40,70,.10)' : '0 8px 20px -8px rgba(20,40,70,.4), inset 0 0 0 1px rgba(20,40,70,.06)' }}>
+      <div style={{ width: size * 0.74, height: size * 0.74 }}><HelmIcon2 cfg={cfg} /></div>
+    </div>
+  );
+}
+
+function LightCard({ ic }) {
+  return (
+    <div className="ab">
+      <p className="ab-rationale">{ic.sub}</p>
+      <div className="stage"><Tile cfg={ic.cfg} size={168} /></div>
+      <div className="tiles">
+        {[92, 60, 40, 28].map(s => <Tile key={s} cfg={ic.cfg} size={s} flat />)}
+        <span className="lbl">sizes</span>
+      </div>
+      <div className="lock"><Tile cfg={ic.cfg} size={50} flat /><WordmarkL accent={ic.accent} /></div>
+    </div>
+  );
+}
+
+function SheepCard({ sc }) {
+  const cfg = { tileBg:'#ffffff', ring:'#1f4e79', stroke:true, hub:'#ffffff', spokes:6, ringW:4.4, sheep: sc.sheep, sheepColors: navySheep('#ffffff') };
+  const Sheep = SHEEP[sc.sheep];
+  return (
+    <div className="ab">
+      <p className="ab-rationale">{sc.sub}</p>
+      <div className="sheepbig">
+        <svg viewBox="0 0 64 64" width="150" height="150" aria-label="sheep">
+          {Sheep(32, 33, 22, navySheep('#eef2f6'))}
+        </svg>
+      </div>
+      <div className="tiles" style={{ alignItems: 'center' }}>
+        <Tile cfg={cfg} size={92} flat />
+        <Tile cfg={cfg} size={44} flat />
+        <span className="lbl">in the helm</span>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="light-helm" title="Light-mode helm (from “D · Monoline”)" subtitle="Light counterparts to your dark pick. Same ship's-wheel + sheep, tuned for light backgrounds. Each shows the tile, four sizes, and the lockup.">
+        {LIGHTS.map(ic => <DCArtboard key={ic.id} id={ic.id} label={ic.name} width={500} height={520}><LightCard ic={ic} /></DCArtboard>)}
+      </DCSection>
+      <DCSection id="sheep" title="The sheep in the hub" subtitle="Four takes on the sheep face that sits at the centre of the wheel — shown large, then inside the helm at icon sizes. Mix-and-match: pick a light tile above + a sheep here.">
+        {SHEEPS.map(sc => <DCArtboard key={sc.id} id={sc.id} label={sc.name} width={400} height={430}><SheepCard sc={sc} /></DCArtboard>)}
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

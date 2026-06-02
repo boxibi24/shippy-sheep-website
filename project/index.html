@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-direction="pasture" data-density="regular">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- ============ SEO ============ -->
+<title>Shippy Sheep Studio — Low-poly games, digital twins & VR simulation</title>
+<meta name="description" content="Shippy Sheep Studio is a game and real-time 3D studio. We build stylized low-poly games, living digital twins, and VR simulations engineered to run on real hardware." />
+<meta name="keywords" content="game studio, low-poly games, digital twin, VR simulation, real-time 3D, game development, Unreal, Unity, WebGL, interactive 3D, AR training" />
+<meta name="author" content="Shippy Sheep Studio" />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#2f9ee0" />
+<link rel="canonical" href="https://shippysheep.studio/" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Shippy Sheep Studio" />
+<meta property="og:title" content="Shippy Sheep Studio — Low-poly games, digital twins & VR simulation" />
+<meta property="og:description" content="A game and real-time 3D studio building stylized low-poly games, living digital twins, and VR simulations that actually run." />
+<meta property="og:url" content="https://shippysheep.studio/" />
+<meta property="og:image" content="https://shippysheep.studio/og-cover.png" />
+<meta property="og:image:alt" content="Shippy Sheep Studio — low-poly worlds" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Shippy Sheep Studio — Low-poly games, digital twins & VR simulation" />
+<meta name="twitter:description" content="A game and real-time 3D studio building stylized low-poly games, living digital twins, and VR simulations that actually run." />
+<meta name="twitter:image" content="https://shippysheep.studio/og-cover.png" />
+
+<!-- Favicon: Shippy Sheep helm mark -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+<!-- ============ JSON-LD ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Shippy Sheep Studio",
+  "url": "https://shippysheep.studio/",
+  "description": "A game and real-time 3D studio building stylized low-poly games, living digital twins, and VR simulations.",
+  "foundingDate": "1993",
+  "knowsAbout": ["Game development", "Digital twins", "VR simulation", "Real-time 3D", "Low-poly art"],
+  "email": "hello@shippysheep.studio",
+  "sameAs": []
+}
+</script>
+
+<!-- ============ Fonts ============ -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="components.css" />
+</head>
+<body>
+<a id="top"></a>
+<div id="root"></div>
+
+<!-- bundler thumbnail (used by standalone/PDF export) -->
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2f9ee0"/><polygon points="14,24 26,14 32,28" fill="#fff"/><polygon points="26,14 42,16 32,28" fill="#e3ecf3"/><polygon points="42,16 50,26 32,28" fill="#fff"/><polygon points="18,38 32,28 32,46" fill="#fff"/><polygon points="48,36 32,28 32,46" fill="#e3ecf3"/><polygon points="27,30 38,30 32,42" fill="#182b3d"/></svg>
+</template>
+
+<!-- React + Babel (pinned) -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- icons + image slots -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="image-slot.js"></script>
+
+<!-- app -->
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="lowpoly.jsx"></script>
+<script type="text/babel" src="sheep.jsx"></script>
+<script type="text/babel" src="sections1.jsx"></script>
+<script type="text/babel" src="sections2.jsx"></script>
+<script type="text/babel" src="sections3.jsx"></script>
+<script type="text/babel" src="sections4.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

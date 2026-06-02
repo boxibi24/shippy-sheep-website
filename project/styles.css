@@ -1,0 +1,259 @@
+/* ============================================================
+   Shippy Sheep Studio — low-poly playground
+   Base tokens, three whole-look directions, density + utilities
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.005em;
+  overflow-x: clip;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* -------- type roles -------- */
+:root {
+  --font-display: 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, sans-serif;
+
+  /* spacing scale */
+  --maxw: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+
+  /* density (regular default; overridden by data-density) */
+  --section-pad: clamp(72px, 11vh, 132px);
+  --card-pad: 30px;
+  --stack: 22px;
+
+  /* shape */
+  --r-sm: 14px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --r-xl: 38px;
+  --r-pill: 999px;
+
+  /* motion */
+  --ease: cubic-bezier(0.16, 1, 0.30, 1);
+  --dur: 240ms;
+
+  --shadow-card: 0 1px 2px rgba(20,30,50,.06), 0 18px 40px -22px rgba(20,30,50,.35);
+  --shadow-hover: 0 2px 6px rgba(20,30,50,.10), 0 30px 60px -26px rgba(20,30,50,.45);
+}
+
+/* ============================================================
+   DIRECTION 1 — PASTURE (light, sunny meadow) — default
+   ============================================================ */
+[data-direction="pasture"] {
+  --bg: #eef8ff;
+  --bg-tint: #dcefff;
+  --surface: #ffffff;
+  --surface-2: #f4f9ff;
+  --ink: #182b3d;
+  --ink-soft: #56708a;
+  --line: rgba(24,43,61,.10);
+
+  --c1: #2f9ee0;   /* sky */
+  --c2: #4fbf6a;   /* grass */
+  --c3: #ffc23d;   /* sun */
+  --c4: #ff7a5c;   /* coral */
+  --c5: #8a6cff;   /* plum */
+  --primary: #2f9ee0;
+  --on-primary: #ffffff;
+
+  --sky-top: #9ed8ff;
+  --sky-bot: #e8f7ff;
+  --hill-back: #9fd6a4;
+  --hill-mid: #66c478;
+  --hill-front: #3da85c;
+  --sun: #ffd24a;
+
+  --glow: 0 0 0 rgba(0,0,0,0);
+}
+
+/* ============================================================
+   DIRECTION 2 — NIGHTFALL (dark, glowing facets)
+   ============================================================ */
+[data-direction="nightfall"] {
+  --bg: #0c1030;
+  --bg-tint: #141a40;
+  --surface: #171d44;
+  --surface-2: #1d2552;
+  --ink: #eef1ff;
+  --ink-soft: #9aa6dd;
+  --line: rgba(255,255,255,.12);
+
+  --c1: #43e7c4;   /* mint */
+  --c2: #9b6cff;   /* purple */
+  --c3: #ffc24d;   /* amber */
+  --c4: #ff6fa5;   /* pink */
+  --c5: #54c7ff;   /* azure */
+  --primary: #43e7c4;
+  --on-primary: #07231c;
+
+  --sky-top: #0a0e2c;
+  --sky-bot: #1a2256;
+  --hill-back: #2a2f72;
+  --hill-mid: #3a2f86;
+  --hill-front: #4a2f9a;
+  --sun: #43e7c4;
+
+  --glow: 0 0 40px rgba(67,231,196,.45);
+}
+
+/* ============================================================
+   DIRECTION 3 — WOOL & PAPER (cream paper-craft pastels)
+   ============================================================ */
+[data-direction="paper"] {
+  --bg: #f6eedf;
+  --bg-tint: #efe3cd;
+  --surface: #fffaf0;
+  --surface-2: #f3e8d4;
+  --ink: #3a3026;
+  --ink-soft: #8a7a64;
+  --line: rgba(58,48,38,.12);
+
+  --c1: #d9774b;   /* terracotta */
+  --c2: #88a06a;   /* sage */
+  --c3: #e0ad4a;   /* mustard */
+  --c4: #c2543f;   /* clay red */
+  --c5: #6f93b0;   /* dusty blue */
+  --primary: #d9774b;
+  --on-primary: #fffaf0;
+
+  --sky-top: #f5d9a8;
+  --sky-bot: #fbeed3;
+  --hill-back: #cdbf95;
+  --hill-mid: #a9b07a;
+  --hill-front: #88a06a;
+  --sun: #e7a84a;
+
+  --glow: 0 0 0 rgba(0,0,0,0);
+}
+
+/* -------- density variants -------- */
+[data-density="compact"] {
+  --section-pad: clamp(52px, 8vh, 90px);
+  --card-pad: 24px;
+  --stack: 16px;
+}
+[data-density="comfy"] {
+  --section-pad: clamp(96px, 15vh, 180px);
+  --card-pad: 38px;
+  --stack: 30px;
+}
+
+/* ============================================================
+   Layout primitives
+   ============================================================ */
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding-inline: var(--gutter); }
+section { position: relative; }
+.section-pad { padding-block: var(--section-pad); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.eyebrow::before {
+  content: ""; width: 22px; height: 22px; flex: none;
+  background: currentColor;
+  -webkit-mask: var(--sheep-glyph) center/contain no-repeat;
+  mask: var(--sheep-glyph) center/contain no-repeat;
+  opacity: .9;
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.02; margin: 0; letter-spacing: -0.02em; }
+.h-display { font-size: clamp(40px, 7vw, 86px); line-height: 0.98; }
+.h2 { font-size: clamp(30px, 4.6vw, 56px); line-height: 1.0; }
+.h3 { font-size: clamp(21px, 2.4vw, 28px); }
+p { margin: 0; line-height: 1.62; }
+.lead { font-size: clamp(17px, 1.5vw, 21px); color: var(--ink-soft); line-height: 1.6; max-width: 62ch; }
+.muted { color: var(--ink-soft); }
+
+.grad-text {
+  background: linear-gradient(100deg, var(--c1), var(--c5) 45%, var(--c4));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+/* -------- buttons -------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 16px; line-height: 1;
+  padding: 16px 24px; border-radius: var(--r-pill);
+  border: 0; transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary {
+  background: var(--primary); color: var(--on-primary);
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--primary) 70%, transparent), var(--glow);
+}
+.btn-primary:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 16px 30px -12px color-mix(in srgb, var(--primary) 80%, transparent), var(--glow); }
+.btn-ghost {
+  background: transparent; color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+.btn-ghost:hover { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ink) 35%, transparent); transform: translateY(-2px); }
+.btn .arr { transition: transform var(--dur) var(--ease); }
+.btn:hover .arr { transform: translateX(3px); }
+
+/* -------- cards -------- */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: var(--card-pad);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  position: relative;
+}
+.card-hover:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+
+/* chip / tag */
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; font-family: var(--font-display);
+  padding: 7px 13px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: color-mix(in srgb, var(--primary) 92%, var(--ink));
+}
+
+/* -------- reveal on scroll -------- */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+.reveal.d1 { transition-delay: .08s; }
+.reveal.d2 { transition-delay: .16s; }
+.reveal.d3 { transition-delay: .24s; }
+.reveal.d4 { transition-delay: .32s; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* faceted low-poly svg fills crisp edges */
+.lowpoly svg { display: block; width: 100%; height: 100%; }
+.lowpoly polygon { shape-rendering: geometricPrecision; }
+
+/* floating sheep bob */
+@keyframes bob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+@keyframes drift { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+/* image-slot defaults */
+image-slot { background: var(--surface-2); }
+
+/* selection */
+::selection { background: color-mix(in srgb, var(--primary) 30%, transparent); }

@@ -5,41 +5,56 @@
 
 ## What this is
 
-_(One or two sentences describing what SS-studio is. Fill this in once the project
-takes shape.)_
+The marketing website for **Shippy Sheep Studio** — a (fictional) game & real-time 3D
+studio. The site is a single self-contained `index.html`: a low-poly themed landing page
+with three switchable visual directions, procedurally-generated SVG scenery, an animated
+sheep "flock", and all the usual marketing sections (hero, services, portfolio, stats,
+mission, team, journal, contact).
 
 ## Stack
 
-_(Languages, frameworks, and key tools. Empty for now — no application code yet.)_
+- **Plain HTML + CSS + vanilla JS** — no framework, no build step, no bundler.
+- All markup is generated at runtime by hand-rolled JS template functions (`render()`),
+  not React. The original Claude Design prototype was React/JSX; it was ported to vanilla.
+- **CDN-only dependencies:** Google Fonts and [Lucide](https://lucide.dev) icons. Everything
+  else (CSS, JS, procedural SVG, favicon) is inlined or local.
 
 ## Layout
 
 ```
 .
 ├── .claude/        # Claude Code project config (settings, etc.)
+├── index.html      # The entire website — markup, CSS, and JS in one file
+├── favicon.svg     # Helm + faceted-sheep brand mark
+├── project/        # Reference: original React/JSX design prototype + assets (not shipped)
+├── chats/          # Reference: the Claude Design transcript this was built from
+├── DESIGN-README.md# Reference: the original design-export README
 ├── CLAUDE.md       # This file
 └── .gitignore
 ```
 
 ## Commands
 
-_(Add the canonical build / test / run / lint commands here as they're created,
-e.g. `npm run dev`, `pytest`, `make build`. Claude reads these to know how to work.)_
+No build/test/lint tooling — it's a static file. Just serve it over HTTP (don't open the
+`file://` directly, or the CDN fonts/icons and `localStorage` tweak persistence misbehave).
 
-| Task   | Command |
-| ------ | ------- |
-| Build  | _TBD_   |
-| Test   | _TBD_   |
-| Run    | _TBD_   |
-| Lint   | _TBD_   |
+| Task  | Command                                              |
+| ----- | ---------------------------------------------------- |
+| Run   | `python -m http.server 8000` → http://localhost:8000 |
+| Build | _none — static `index.html`_                         |
+| Test  | _none_                                               |
+| Lint  | _none_                                               |
 
 ## Conventions
 
-_(House style, naming rules, commit conventions, anything non-obvious a contributor
-or Claude should follow.)_
+- Keep everything in the single `index.html`. Sections are built by small `XxxSection()`-style
+  functions that return HTML strings; `render()` assembles them and re-runs on theme changes.
+- Procedural SVG (low-poly scenery, sheep) uses a seeded PRNG (`mulberry32`) so output is
+  deterministic — don't introduce `Math.random()` in render paths.
+- Three themes are driven by `data-theme` on `<html>` + CSS custom properties; the tweak
+  panel persists choices to `localStorage`.
 
 ## Notes for Claude
 
-- This is a fresh workspace — no app code exists yet.
-- When code is added, update the **Stack**, **Layout**, and **Commands** sections so
-  this file stays accurate.
+- `project/` and `chats/` are reference/provenance only — the shipped artifact is `index.html`.
+- Keep the **Stack**, **Layout**, and **Commands** sections above accurate as the site evolves.

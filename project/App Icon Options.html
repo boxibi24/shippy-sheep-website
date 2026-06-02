@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shippy Sheep Studio — Helm app-icon variations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; font-family: 'Figtree', sans-serif; }
+  .ab { background: #fff; height: 100%; box-sizing: border-box; padding: 26px; display: flex; flex-direction: column; gap: 18px; }
+  .ab-rationale { font-size: 13.5px; color: #647689; line-height: 1.5; margin: 0; }
+  .stage { background: #eef1f5; border-radius: 22px; padding: 30px; display: grid; place-items: center; }
+  .tiles { display: flex; align-items: flex-end; gap: 16px; padding-left: 4px; }
+  .tiles .lbl, .lock .lbl { font-size: 12px; color: #98a6b6; font-family: 'Fredoka', sans-serif; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-left: auto; align-self: center; }
+  .lock { display: flex; align-items: center; gap: 14px; border-top: 1px solid #eceff3; padding-top: 18px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1f4e79"/><circle cx="32" cy="32" r="20" fill="none" stroke="#fff" stroke-width="4"/><circle cx="32" cy="32" r="12" fill="#fff"/><polygon points="26,30 38,30 32,40" fill="#1f4e79"/></svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="logos2.jsx"></script>
+<script type="text/babel">
+const ICONS = [
+  { id: 'helmA', name: 'A · Harbor Navy', accent: '#1f4e79', tileBg: '#1f4e79',
+    cfg: { tileBg: '#1f4e79', ring: '#ffffff', hub: '#163a5c', face: '#1f4e79', spokes: 8, ringW: 4.4 },
+    sub: 'Closest to your pick — white 8-spoke helm on deep navy. The most classic, declarative app-icon read.' },
+  { id: 'helmB', name: 'B · Tide', accent: '#2f9ee0', tileBg: 'linear-gradient(135deg,#3aa6ea,#1b466e)',
+    cfg: { tileBg: 'linear-gradient(135deg,#3aa6ea,#1b466e)', ring: '#ffffff', hub: '#1c4e7a', face: '#15426c', spokes: 6, ringW: 5 },
+    sub: 'Same helm on a sky→deep-blue tide gradient. A touch more energetic; still reads cleanly small.' },
+  { id: 'helmC', name: 'C · Cream Classic', accent: '#1f4e79', tileBg: '#f4eddd',
+    cfg: { tileBg: '#f4eddd', ring: '#1f4e79', hub: '#1f4e79', face: '#102c49', spokes: 6, ringW: 5 },
+    sub: 'Inverted — navy helm on a warm cream tile. Friendlier, fits a lighter UI; white sheep pops in the hub.' },
+  { id: 'helmD', name: 'D · Monoline', accent: '#43e7c4', tileBg: '#152538',
+    cfg: { tileBg: '#152538', ring: '#ffffff', hub: '#152538', face: '#152538', spokes: 6, ringW: 4, stroke: true },
+    sub: 'Stroke-only helm, hub cut out of the tile. The most modern / minimal; sheep is a clean white silhouette.' },
+  { id: 'helmE', name: 'E · Sun Helm', accent: '#ffc23d', tileBg: '#1f4e79',
+    cfg: { tileBg: '#1f4e79', ring: '#ffc23d', hub: '#163a5c', face: '#1f4e79', spokes: 6, ringW: 5 },
+    sub: 'Navy tile with a brass/sun-gold wheel — a warm pop that stands out in a dock of blue icons.' },
+  { id: 'helmF', name: 'F · Sky Buoy', accent: '#ffffff', tileBg: 'linear-gradient(160deg,#42b0f0,#2f7fc4)',
+    cfg: { tileBg: 'linear-gradient(160deg,#42b0f0,#2f7fc4)', ring: '#ffffff', hub: '#1f6aa6', face: '#1a4e7c', spokes: 6, ringW: 5 },
+    sub: 'Bright sky-blue buoy tile, white helm. The most playful/approachable of the set.' },
+];
+
+function Tile({ cfg, size, flat }) {
+  return (
+    <div style={{ width: size, height: size, borderRadius: size * 0.225, background: cfg.tileBg, display: 'grid', placeItems: 'center', boxShadow: flat ? 'inset 0 0 0 1px rgba(20,40,70,.08)' : '0 8px 20px -8px rgba(20,40,70,.45)' }}>
+      <div style={{ width: size * 0.74, height: size * 0.74 }}><HelmIcon cfg={cfg} /></div>
+    </div>
+  );
+}
+
+function Card({ ic }) {
+  return (
+    <div className="ab">
+      <p className="ab-rationale">{ic.sub}</p>
+      <div className="stage"><Tile cfg={ic.cfg} size={172} /></div>
+      <div className="tiles">
+        {[96, 64, 44, 30].map(s => <Tile key={s} cfg={ic.cfg} size={s} flat />)}
+        <span className="lbl">home-screen sizes</span>
+      </div>
+      <div className="lock">
+        <Tile cfg={ic.cfg} size={52} flat />
+        <WordmarkH accent={ic.accent} />
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="helm-icons" title="Shippy Sheep — app-icon variations (from “Helmsheep”)" subtitle="Six takes on the ship's-wheel + sheep idea, tuned as declarative app icons. Each shows the full tile, four home-screen sizes (down to 30px), and the lockup. Pick one — or mix a tile from one with the wheel color of another.">
+        {ICONS.map(ic => (
+          <DCArtboard key={ic.id} id={ic.id} label={ic.name} width={520} height={540}>
+            <Card ic={ic} />
+          </DCArtboard>
+        ))}
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
