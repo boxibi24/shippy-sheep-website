@@ -1,8 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" data-direction="pasture" data-density="regular">
+<html lang="en" data-direction="paper" data-density="comfy">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Set the colour mode before first paint (no flash): light = Wool & Paper, dark = Nightfall.
+     Stored choice wins; otherwise follow the OS preference. -->
+<script>
+  (function () {
+    try {
+      var m = localStorage.getItem('shippy-mode');
+      if (m !== 'light' && m !== 'dark') {
+        m = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      }
+      var r = document.documentElement;
+      r.setAttribute('data-direction', m === 'dark' ? 'nightfall' : 'paper');
+      r.setAttribute('data-density', 'comfy');
+    } catch (e) {}
+  })();
+</script>
 
 <!-- ============ SEO ============ -->
 <title>Shippy Sheep Studio — Low-poly games, digital twins & VR simulation</title>
@@ -10,7 +26,7 @@
 <meta name="keywords" content="game studio, low-poly games, digital twin, VR simulation, real-time 3D, game development, Unreal, Unity, WebGL, interactive 3D, AR training" />
 <meta name="author" content="Shippy Sheep Studio" />
 <meta name="robots" content="index, follow" />
-<meta name="theme-color" content="#2f9ee0" />
+<meta name="theme-color" content="#cc3a2e" />
 <link rel="canonical" href="https://boxibi24.github.io/shippy-sheep-website/" />
 
 <!-- Open Graph -->
@@ -153,17 +169,17 @@ button { font-family: inherit; cursor: pointer; }
   --c3: #ffc24d;   /* amber */
   --c4: #ff6fa5;   /* pink */
   --c5: #54c7ff;   /* azure */
-  --primary: #43e7c4;
-  --on-primary: #07231c;
+  --primary: #7c4dff;   /* purple accent (AA: ~4.8:1 with white) */
+  --on-primary: #ffffff;
 
   --sky-top: #0a0e2c;
   --sky-bot: #1a2256;
   --hill-back: #2a2f72;
   --hill-mid: #3a2f86;
   --hill-front: #4a2f9a;
-  --sun: #43e7c4;
+  --sun: #c4b0ff;   /* lavender moon-glow, tuned to the purple accent */
 
-  --glow: 0 0 40px rgba(67,231,196,.45);
+  --glow: 0 0 40px rgba(124,77,255,.5);
 }
 
 /* ============================================================
@@ -183,7 +199,7 @@ button { font-family: inherit; cursor: pointer; }
   --c3: #e0ad4a;   /* mustard */
   --c4: #c2543f;   /* clay red */
   --c5: #6f93b0;   /* dusty blue */
-  --primary: #d9774b;
+  --primary: #cc3a2e;   /* red accent (AA: ~5:1 with the cream on-primary) */
   --on-primary: #fffaf0;
 
   --sky-top: #f5d9a8;
@@ -503,27 +519,51 @@ p { margin: 0; line-height: 1.62; }
 .footer-bar { line-height: 0; }
 .footer-legal { display: flex; justify-content: space-between; gap: 20px; padding-block: 24px; font-size: 13px; color: rgba(255,255,255,.55); flex-wrap: wrap; }
 
-/* ============ FLOCK (animated background sheep) ============ */
+/* ============ FLOCK MINIGAME (cursor-herding sheep + food) ============ */
 main { position: relative; z-index: 1; }
-.flock { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
-/* layered so each transform is independent: walker = horizontal travel + edge fade,
-   bob = walk bounce, face = which way it's looking (scaleX). */
-.flock-walker { position: absolute; left: 0; will-change: transform, opacity;
-  animation-name: flockDrift; animation-timing-function: linear; animation-iteration-count: infinite; }
-.flock-bob { will-change: transform; animation-name: flockBob;
-  animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
-.flock-face { display: block; filter: drop-shadow(0 6px 12px rgba(20,40,70,.14)); }
-@keyframes flockDrift {
-  0%   { transform: translateX(var(--x0)); opacity: 0; }
-  6%   { opacity: var(--op); }
-  94%  { opacity: var(--op); }
-  100% { transform: translateX(var(--x1)); opacity: 0; }
-}
-@keyframes flockBob { 0% { transform: translateY(0) rotate(-2.5deg); } 100% { transform: translateY(-7px) rotate(2.5deg); } }
-@media (prefers-reduced-motion: reduce) {
-  .flock-walker, .flock-bob { animation: none !important; }
-  .flock-walker { transform: translateX(45vw); opacity: var(--op); }
-}
+/* The play layer floats over the page but never eats clicks — only the
+   controls do. It lives on <body> (outside #root) so it survives re-renders. */
+#flock-game { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; }
+.flock-unit { position: absolute; top: 0; left: 0; will-change: transform; filter: drop-shadow(0 8px 12px rgba(20,40,70,.20)); }
+.flock-unit-face { will-change: transform; transform-origin: 50% 72%; }
+.flock-unit-face svg { display: block; }
+.flock-unit.poof { animation: flockPoof .32s var(--ease) forwards; }
+@keyframes flockPoof { to { transform: scale(.2) translateY(-14px); opacity: 0; } }
+.flock-food { position: absolute; top: 0; left: 0; will-change: transform, opacity; transform-origin: 50% 90%; animation: flockFoodIn .28s var(--ease); }
+.flock-food svg { display: block; }
+@keyframes flockFoodIn { from { transform: translateY(8px) scale(.4); opacity: 0; } }
+
+/* control cluster (bottom-right) */
+.flock-ctl { position: fixed; right: 18px; bottom: 18px; z-index: 48; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.flock-fab { position: relative; width: 58px; height: 58px; border-radius: 50%; border: 0;
+  background: var(--primary); color: var(--on-primary); display: grid; place-items: center; pointer-events: auto;
+  box-shadow: 0 12px 28px -8px color-mix(in srgb, var(--primary) 70%, transparent), 0 4px 10px rgba(0,0,0,.18), var(--glow);
+  transition: transform .15s var(--ease), filter .15s var(--ease); }
+.flock-fab:hover { transform: translateY(-2px) scale(1.05); filter: brightness(1.06); }
+.flock-fab:active { transform: scale(.94); }
+.flock-fab > svg { width: 36px; height: auto; pointer-events: none; }
+.flock-fab .flock-plus { position: absolute; right: 5px; bottom: 4px; width: 19px; height: 19px; border-radius: 50%;
+  background: var(--on-primary); color: var(--primary); font: 700 15px/19px var(--font-display); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.flock-count { position: absolute; top: -5px; left: -5px; min-width: 21px; height: 21px; padding: 0 5px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); font: 700 11px/21px var(--font-display); text-align: center; display: none; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.flock-count[data-show="1"] { display: block; }
+.flock-clear { width: 40px; height: 40px; border-radius: 50%; border: 0; pointer-events: auto;
+  background: color-mix(in srgb, var(--ink) 10%, var(--surface)); color: var(--ink); display: none; place-items: center;
+  box-shadow: var(--shadow-card); transition: transform .15s var(--ease), background .15s; }
+.flock-clear[data-show="1"] { display: grid; }
+.flock-clear:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--ink) 18%, var(--surface)); }
+.flock-clear svg { width: 19px; height: 19px; }
+
+/* one-time discovery hint */
+.flock-hint { position: fixed; right: 88px; bottom: 24px; z-index: 48; max-width: 230px; display: none;
+  align-items: flex-start; gap: 8px; padding: 11px 12px; border-radius: 14px 14px 4px 14px;
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow-hover); border: 1px solid var(--line);
+  font: 500 13px/1.4 var(--font-body); animation: flockFoodIn .3s var(--ease); }
+.flock-hint[data-show="1"] { display: flex; }
+.flock-hint b { font-family: var(--font-display); }
+.flock-hint-x { flex: none; appearance: none; border: 0; background: transparent; color: var(--ink-soft); width: 18px; height: 18px; border-radius: 5px; font-size: 12px; line-height: 1; }
+.flock-hint-x:hover { background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink); }
+@media (max-width: 560px) { .flock-hint { max-width: 180px; right: 78px; } }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 1040px) {
@@ -553,45 +593,15 @@ main { position: relative; z-index: 1; }
   .hero-mini-stats { gap: 22px; }
 }
 
-/* ============ TWEAKS PANEL ============ */
-.twk-fab { position: fixed; right: 18px; bottom: 18px; z-index: 2147483645; width: 48px; height: 48px;
-  border-radius: 50%; border: 0; background: rgba(41,38,27,.82); color: #fff; display: grid; place-items: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,.28); backdrop-filter: blur(8px); transition: transform .15s var(--ease); }
-.twk-fab:hover { transform: scale(1.06); }
-.twk-fab svg { width: 22px; height: 22px; }
-
-.twk-panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483646; width: 280px;
-  max-height: calc(100vh - 32px); display: flex; flex-direction: column;
-  background: rgba(250,249,247,.82); color: #29261b;
-  -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
-  border: .5px solid rgba(255,255,255,.6); border-radius: 14px;
-  box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 12px 40px rgba(0,0,0,.18);
-  font: 11.5px/1.4 ui-sans-serif, system-ui, -apple-system, sans-serif; overflow: hidden; }
-.twk-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px 10px 14px; user-select: none; }
-.twk-hd b { font-size: 12px; font-weight: 600; letter-spacing: .01em; }
-.twk-x { appearance: none; border: 0; background: transparent; color: rgba(41,38,27,.55); width: 22px; height: 22px; border-radius: 6px; font-size: 13px; line-height: 1; }
-.twk-x:hover { background: rgba(0,0,0,.06); color: #29261b; }
-.twk-body { padding: 2px 14px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; overflow-x: hidden; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.15) transparent; }
-.twk-sect { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgba(41,38,27,.45); padding: 10px 0 0; }
-.twk-sect:first-child { padding-top: 0; }
-.twk-row { display: flex; flex-direction: column; gap: 5px; }
-.twk-lbl { display: flex; justify-content: space-between; align-items: baseline; color: rgba(41,38,27,.72); }
-.twk-lbl > span:first-child { font-weight: 500; }
-.twk-field { appearance: none; box-sizing: border-box; width: 100%; min-width: 0; height: 26px; padding: 0 8px; border: .5px solid rgba(0,0,0,.1); border-radius: 7px; background: rgba(255,255,255,.6); color: inherit; font: inherit; outline: none; }
-.twk-field:focus { border-color: rgba(0,0,0,.25); background: rgba(255,255,255,.85); box-shadow: 0 0 0 2px rgba(0,0,0,.18); }
-select.twk-field { padding-right: 22px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
-  background-repeat: no-repeat; background-position: right 8px center; }
-.twk-seg { position: relative; display: flex; padding: 2px; border-radius: 8px; background: rgba(0,0,0,.06); user-select: none; }
-.twk-seg-thumb { position: absolute; top: 2px; bottom: 2px; border-radius: 6px; background: rgba(255,255,255,.9); box-shadow: 0 1px 2px rgba(0,0,0,.12); transition: left .15s cubic-bezier(.3,.7,.4,1), width .15s; }
-.twk-seg button { appearance: none; position: relative; z-index: 1; flex: 1; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 500; min-height: 22px; border-radius: 6px; padding: 4px 6px; line-height: 1.2; overflow-wrap: anywhere; }
-.twk-chips { display: flex; gap: 6px; }
-.twk-chip { position: relative; appearance: none; flex: 1; min-width: 0; height: 46px; padding: 0; border: 0; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 .5px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.06); transition: transform .12s cubic-bezier(.3,.7,.4,1), box-shadow .12s; }
-.twk-chip:hover { transform: translateY(-1px); box-shadow: 0 0 0 .5px rgba(0,0,0,.18), 0 4px 10px rgba(0,0,0,.12); }
-.twk-chip[data-on="1"] { box-shadow: 0 0 0 1.5px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.15); }
-.twk-chip svg { position: absolute; top: 6px; left: 6px; width: 13px; height: 13px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
-.twk-btn { appearance: none; height: 26px; padding: 0 12px; border: 0; border-radius: 7px; background: rgba(0,0,0,.06); color: inherit; font: inherit; font-weight: 500; }
-.twk-btn:hover { background: rgba(0,0,0,.1); }
+/* ============ LIGHT / DARK TOGGLE ============ */
+.mode-toggle { display: inline-grid; place-items: center; width: 42px; height: 42px; flex: none;
+  border-radius: 50%; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 70%, transparent);
+  color: var(--ink); transition: transform .2s var(--ease), background .2s var(--ease), color .2s var(--ease); }
+.mode-toggle:hover { transform: translateY(-1px); background: var(--surface); color: var(--primary); }
+.mode-toggle svg { width: 20px; height: 20px; }
+.nav-drawer .mode-toggle { width: 100%; border-radius: var(--r-pill); gap: 10px; height: 48px; font-family: var(--font-display); font-weight: 600; }
+.nav-drawer .mode-toggle .mode-label { display: inline; }
+.mode-toggle .mode-label { display: none; }
 
 /* ============ JOURNAL read button ============ */
 .journal-read {
@@ -936,32 +946,8 @@ function FacetBand(color, flip, height = 90){
     + `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${tris}</svg></div>`;
 }
 
-/* ---------------- background flock ---------------- */
-function GlobalFlock(count = 16, seed = 7){
-  if (!count) return '';
-  const rnd = mulberry32(seed);
-  const r = () => rnd();
-  let out = '';
-  for (let i = 0; i < count; i++){
-    const dir = r() < 0.5 ? 1 : -1;                          // 1 = walks right, -1 = walks left
-    const top = (i + 0.5) / count * 100 + (r() - 0.5) * (70 / count);
-    const size = 34 + r() * 40;
-    const color = SHEEP_KEYS[i % SHEEP_KEYS.length];
-    const op = (0.5 + r() * 0.4).toFixed(2);
-    const travelDur = (24 + r() * 30).toFixed(1);            // seconds to cross the page
-    const travelDelay = (-(r() * travelDur)).toFixed(1);     // stagger so they're spread out
-    const bobDur = (1.3 + r() * 1.2).toFixed(2);
-    const bobDelay = (-(r() * 2)).toFixed(2);
-    const x0 = dir > 0 ? '-14vw' : '114vw';
-    const x1 = dir > 0 ? '114vw' : '-14vw';
-    out += `<div class="flock-walker" style="top:${top.toFixed(2)}%;--x0:${x0};--x1:${x1};--op:${op};`
-      + `animation-duration:${travelDur}s;animation-delay:${travelDelay}s">`
-      + `<div class="flock-bob" style="animation-duration:${bobDur}s;animation-delay:${bobDelay}s">`
-      + `<div class="flock-face" style="transform:scaleX(${dir})">${WalkSheep(color, size)}</div>`
-      + `</div></div>`;
-  }
-  return `<div class="flock" aria-hidden="true">${out}</div>`;
-}
+/* The wandering flock is now the interactive minigame mounted on <body>;
+   see the FLOCK MINIGAME block near the bottom of this script. */
 
 /* ---------------- procedural low-poly art (fills the image slots) ---------------- */
 /* A seeded low-poly vignette: faceted sky, a low-poly sun, layered hills, and a
@@ -1172,12 +1158,14 @@ function Nav(direction){
       </a>
       <nav class="nav-links" aria-label="Primary">${linkHtml}</nav>
       <div class="nav-cta">
+        ${ModeToggle()}
         <button class="btn btn-primary nav-btn" data-contact>Start a project <span class="arr">→</span></button>
         <button class="nav-burger" aria-label="Menu" aria-expanded="false" data-burger><span></span><span></span><span></span></button>
       </div>
     </div>
     <div class="nav-drawer" data-drawer style="display:none">
       ${drawerHtml}
+      ${ModeToggle()}
       <button class="btn btn-primary" data-contact data-drawer-link>Start a project →</button>
     </div>
   </header>`;
@@ -1487,85 +1475,43 @@ function Footer(){
 }
 
 /* ============================================================
-   TWEAKS — state + panel
+   COLOUR MODE — light (Wool & Paper) / dark (Nightfall)
    ============================================================ */
-const FONT_OPTIONS = {
-  'Fredoka': "'Fredoka', system-ui, sans-serif",
-  'Baloo 2': "'Baloo 2', system-ui, sans-serif",
-  'Space Grotesk': "'Space Grotesk', system-ui, sans-serif",
-  'Bricolage Grotesque': "'Bricolage Grotesque', system-ui, sans-serif",
-};
-const TWEAK_DEFAULTS = { direction: 'pasture', hero: 'split', primary: '', font: 'Fredoka', density: 'regular', flock: 'calm' };
+function systemPrefersDark(){
+  return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+function resolveMode(){
+  try { const m = localStorage.getItem('shippy-mode'); if (m === 'light' || m === 'dark') return m; } catch {}
+  return systemPrefersDark() ? 'dark' : 'light';
+}
+let mode = resolveMode();
+const DIRECTION_FOR = { light: 'paper', dark: 'nightfall' };
 
-let tweaks = (() => {
-  try { return Object.assign({}, TWEAK_DEFAULTS, JSON.parse(localStorage.getItem('shippy-tweaks') || '{}')); }
-  catch { return Object.assign({}, TWEAK_DEFAULTS); }
-})();
-let panelOpen = false;
-
-function setTweak(key, val){
-  tweaks[key] = val;
-  try { localStorage.setItem('shippy-tweaks', JSON.stringify(tweaks)); } catch {}
+function setMode(m){
+  mode = (m === 'dark') ? 'dark' : 'light';
+  try { localStorage.setItem('shippy-mode', mode); } catch {}
   render();
 }
+function toggleMode(){ setMode(mode === 'dark' ? 'light' : 'dark'); }
 
+/* Density is locked to comfy and the hero to the scene-split layout; the only
+   live control is the light/dark switch, which drives the data-direction theme. */
 function applyTheme(){
   const root = document.documentElement;
-  root.setAttribute('data-direction', tweaks.direction);
-  root.setAttribute('data-density', tweaks.density);
-  root.style.setProperty('--font-display', FONT_OPTIONS[tweaks.font] || FONT_OPTIONS['Fredoka']);
-  const prim = (tweaks.primary && String(tweaks.primary).startsWith('#')) ? tweaks.primary : null;
-  if (prim) root.style.setProperty('--primary', prim); else root.style.removeProperty('--primary');
-  const tc = prim || getComputedStyle(root).getPropertyValue('--primary').trim();
+  root.setAttribute('data-direction', DIRECTION_FOR[mode]);
+  root.setAttribute('data-density', 'comfy');
+  const tc = getComputedStyle(root).getPropertyValue('--primary').trim();
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta && tc) meta.setAttribute('content', tc);
 }
 
-const ACCENT_OPTIONS = ['#2f9ee0', '#4fbf6a', '#ff7a5c', '#8a6cff'];
-const check = (light) => `<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.2 5.8 10 11 4.2" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke="${light ? 'rgba(0,0,0,.78)' : '#fff'}"/></svg>`;
-function isLight(hex){ const A = _hex(hex); return A[0]*299 + A[1]*587 + A[2]*114 > 148000; }
-
-function twkSelect(label, key, options){
-  const opts = options.map(o => `<option value="${o.value}"${o.value === tweaks[key] ? ' selected' : ''}>${o.label}</option>`).join('');
-  return `<div class="twk-row"><div class="twk-lbl"><span>${label}</span></div>
-    <select class="twk-field" data-twk-select="${key}">${opts}</select></div>`;
-}
-function twkRadio(label, key, options){
-  const idx = Math.max(0, options.indexOf(tweaks[key]));
-  const n = options.length;
-  const btns = options.map(o => `<button type="button" data-twk-radio="${key}" data-val="${o}">${o}</button>`).join('');
-  return `<div class="twk-row"><div class="twk-lbl"><span>${label}</span></div>
-    <div class="twk-seg"><div class="twk-seg-thumb" style="left:calc(2px + ${idx} * (100% - 4px) / ${n});width:calc((100% - 4px) / ${n})"></div>${btns}</div></div>`;
-}
-function twkColor(label, key, options){
-  const chips = options.map(c => {
-    const on = String(tweaks[key]).toLowerCase() === c.toLowerCase();
-    return `<button type="button" class="twk-chip" data-twk-color="${key}" data-val="${c}" data-on="${on ? '1' : '0'}" style="background:${c}" aria-label="${c}">${on ? check(isLight(c)) : ''}</button>`;
-  }).join('');
-  return `<div class="twk-row"><div class="twk-lbl"><span>${label}</span></div><div class="twk-chips">${chips}</div></div>`;
-}
-
-function TweaksUI(){
-  const fab = `<button class="twk-fab" data-twk-toggle aria-label="Open tweaks">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
-  </button>`;
-  if (!panelOpen) return fab;
-  return fab + `<div class="twk-panel">
-    <div class="twk-hd"><b>Tweaks</b><button class="twk-x" data-twk-toggle aria-label="Close tweaks">✕</button></div>
-    <div class="twk-body">
-      <div class="twk-sect">Visual direction</div>
-      ${twkSelect('Whole look', 'direction', [{ value: 'pasture', label: 'Pasture · sunny day' }, { value: 'nightfall', label: 'Nightfall · dark glow' }, { value: 'paper', label: 'Wool & Paper · cozy' }])}
-      ${twkSelect('Hero style', 'hero', [{ value: 'split', label: 'Scene split' }, { value: 'stage', label: 'Full stage' }, { value: 'showcase', label: 'Image showcase' }])}
-      <div class="twk-sect">Theme</div>
-      ${twkColor('Accent', 'primary', ACCENT_OPTIONS)}
-      <button type="button" class="twk-btn" data-twk-reset>Reset accent to theme</button>
-      <div class="twk-sect">Type & spacing</div>
-      ${twkSelect('Display font', 'font', Object.keys(FONT_OPTIONS).map(f => ({ value: f, label: f })))}
-      ${twkRadio('Density', 'density', ['compact', 'regular', 'comfy'])}
-      <div class="twk-sect">Flock</div>
-      ${twkRadio('Floating sheep', 'flock', ['off', 'calm', 'lots'])}
-    </div>
-  </div>`;
+/* sun / moon switch shown in the nav + mobile drawer */
+function ModeToggle(){
+  const dark = mode === 'dark';
+  const sun = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>`;
+  const moon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 6.5 6.5 0 1 0 20 14.5Z"/></svg>`;
+  const label = dark ? 'Light mode' : 'Dark mode';
+  return `<button class="mode-toggle" type="button" data-mode-toggle role="switch" aria-checked="${dark}" aria-label="Switch to ${dark ? 'light' : 'dark'} mode" title="${label}">${dark ? sun : moon}<span class="mode-label">${label}</span></button>`;
 }
 
 /* ============================================================
@@ -1601,8 +1547,6 @@ function initReveal(){
 /* ============================================================
    RENDER + wiring
    ============================================================ */
-const flockCounts = { off: 0, calm: 16, lots: 28 };
-
 function goContact(){
   const el = document.getElementById('contact');
   if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 20, behavior: 'smooth' });
@@ -1731,15 +1675,8 @@ function wireEvents(){
     }));
   }
 
-  // tweaks panel
-  document.querySelectorAll('[data-twk-toggle]').forEach(b => b.addEventListener('click', () => {
-    panelOpen = !panelOpen; render();
-  }));
-  document.querySelectorAll('[data-twk-select]').forEach(s => s.addEventListener('change', (e) => setTweak(s.dataset.twkSelect, e.target.value)));
-  document.querySelectorAll('[data-twk-radio]').forEach(b => b.addEventListener('click', () => setTweak(b.dataset.twkRadio, b.dataset.val)));
-  document.querySelectorAll('[data-twk-color]').forEach(b => b.addEventListener('click', () => setTweak(b.dataset.twkColor, b.dataset.val)));
-  const reset = document.querySelector('[data-twk-reset]');
-  if (reset) reset.addEventListener('click', () => setTweak('primary', ''));
+  // light / dark switch
+  document.querySelectorAll('[data-mode-toggle]').forEach(b => b.addEventListener('click', toggleMode));
 
   // content modals (journal articles + info pages)
   document.querySelectorAll('[data-modal]').forEach(el => el.addEventListener('click', (e) => {
@@ -1753,13 +1690,12 @@ function wireEvents(){
 function render(){
   applyTheme();
   closeModal(); // any open modal is wiped by the re-render; tear it down cleanly first
-  const count = flockCounts[tweaks.flock] ?? 16;
+  const direction = DIRECTION_FOR[mode];
   document.getElementById('root').innerHTML =
     `<div id="app" style="position:relative">
-      ${GlobalFlock(count)}
-      ${Nav(tweaks.direction)}
+      ${Nav(direction)}
       <main>
-        ${Hero(tweaks.hero, tweaks.direction)}
+        ${Hero('split', direction)}
         ${Services()}
         ${Portfolio()}
         ${Stats()}
@@ -1769,7 +1705,7 @@ function render(){
         ${Contact()}
       </main>
       ${Footer()}
-    </div>` + TweaksUI() + `<div id="modal-root"></div>`;
+    </div><div id="modal-root"></div>`;
 
   wireEvents();
   initReveal();
@@ -1779,6 +1715,248 @@ function render(){
 render();
 // lucide loads async via CDN; re-run once it's ready in case it wasn't at first render.
 window.addEventListener('load', () => { if (window.lucide) window.lucide.createIcons(); });
+
+/* ============================================================
+   FLOCK MINIGAME — herd the sheep, drop food to feed them
+   ------------------------------------------------------------
+   A persistent play layer mounted on <body> (so it lives through
+   theme re-renders). The flock follows the cursor; click anywhere
+   on the page background to drop a tuft of food and the nearest
+   sheep break off to munch it before drifting back to the cursor.
+   ============================================================ */
+(function initFlockGame(){
+  if (window.__flockGame) return;          // guard against double-init
+  window.__flockGame = true;
+
+  const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const W = () => window.innerWidth;
+  const H = () => window.innerHeight;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const NAV_H = 70;                        // keep the flock below the sticky header
+  const MAX_SHEEP = 60;
+  const MAX_FOOD = 6;
+
+  // ---- food sprite: a little grass + hay tuft (theme-agnostic) ----
+  function foodSprite(){
+    return `<svg width="40" height="34" viewBox="0 0 40 34" aria-hidden="true">
+      <ellipse cx="20" cy="30" rx="14" ry="3.4" fill="rgba(20,40,20,.16)"/>
+      <g fill="none" stroke-linecap="round">
+        <path d="M20 31 C14 23 12 14 14 7"  stroke="#3da85c" stroke-width="3"/>
+        <path d="M20 31 C20 22 20 13 20 6"  stroke="#4fbf6a" stroke-width="3"/>
+        <path d="M20 31 C26 23 28 14 26 7"  stroke="#3da85c" stroke-width="3"/>
+        <path d="M20 31 C15 25 10 20 7 15"  stroke="#66c478" stroke-width="2.6"/>
+        <path d="M20 31 C25 25 30 20 33 15" stroke="#66c478" stroke-width="2.6"/>
+        <path d="M16 31 C16 24 15 18 13 13" stroke="#e0ad4a" stroke-width="2.4"/>
+        <path d="M24 31 C24 24 25 18 27 13" stroke="#e7a84a" stroke-width="2.4"/>
+      </g>
+      <circle cx="13" cy="12" r="2.3" fill="#f0c560"/>
+      <circle cx="27" cy="12" r="2.3" fill="#f0c560"/>
+    </svg>`;
+  }
+
+  // ---- DOM: play layer + control cluster + one-time hint ----
+  const layer = document.createElement('div');
+  layer.id = 'flock-game';
+  layer.setAttribute('aria-hidden', 'true');
+
+  const ctl = document.createElement('div');
+  ctl.className = 'flock-ctl';
+  ctl.innerHTML =
+    `<button class="flock-clear" type="button" aria-label="Shoo the whole flock away" title="Shoo the flock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <button class="flock-fab" type="button" aria-label="Spawn a sheep" title="Spawn a sheep — they'll follow your cursor">
+      <span class="flock-count" data-count aria-hidden="true">0</span>
+      ${WalkSheep('white', 36)}
+      <span class="flock-plus" aria-hidden="true">+</span>
+    </button>`;
+
+  const hint = document.createElement('div');
+  hint.className = 'flock-hint';
+  hint.innerHTML = `<span><b>Herd the flock!</b> They follow your cursor — click anywhere to drop food 🌾</span>
+    <button class="flock-hint-x" type="button" aria-label="Dismiss hint">✕</button>`;
+
+  document.body.appendChild(layer);
+  document.body.appendChild(ctl);
+  document.body.appendChild(hint);
+
+  const countEl = ctl.querySelector('[data-count]');
+  const clearBtn = ctl.querySelector('.flock-clear');
+
+  // ---- state ----
+  const sheep = [];
+  const foods = [];
+  let pointer = { x: W() / 2, y: H() * 0.45 };
+  let n = 0;                                // monotonic counter → deterministic colour/size variety
+  let raf = 0, running = false;
+
+  function refreshControls(){
+    countEl.textContent = sheep.length;
+    countEl.dataset.show = sheep.length ? '1' : '0';
+    clearBtn.dataset.show = sheep.length ? '1' : '0';
+  }
+
+  function ensureLoop(){ if (!running){ running = true; raf = requestAnimationFrame(step); } }
+
+  // ---- spawn / despawn ----
+  function makeSheep(x, y){
+    if (sheep.length >= MAX_SHEEP) return;
+    n++;
+    const color = SHEEP_KEYS[n % SHEEP_KEYS.length];
+    const size = 34 + (n * 11 % 20);                 // 34..53
+    const el = document.createElement('div');
+    el.className = 'flock-unit';
+    el.innerHTML = `<div class="flock-unit-face">${WalkSheep(color, size)}</div>`;
+    layer.appendChild(el);
+    sheep.push({
+      el, face: el.firstChild,
+      x, y, vx: 0, vy: 0,
+      dir: 1, eat: 0,
+      bob: rand(0, 6.28),
+      sp: rand(0.86, 1.18),                          // per-sheep speed variance
+    });
+    refreshControls();
+    ensureLoop();
+  }
+
+  function spawnFromFab(){
+    const r = ctl.getBoundingClientRect();
+    makeSheep(r.left + rand(0, r.width), r.top + 6);
+    dismissHint(false);
+  }
+
+  function dropFood(x, y){
+    if (!sheep.length) return;                       // nothing around to eat it
+    if (foods.length >= MAX_FOOD){ const old = foods.shift(); old.el.remove(); }
+    const el = document.createElement('div');
+    el.className = 'flock-food';
+    el.innerHTML = foodSprite();
+    el.style.transform = `translate3d(${(x - 20).toFixed(1)}px, ${(y - 26).toFixed(1)}px, 0)`;
+    layer.appendChild(el);
+    foods.push({ x, y, el, amount: 100, max: 100 });
+    dismissHint(true);
+    ensureLoop();
+  }
+
+  function clearFlock(){
+    sheep.forEach(s => { const el = s.el; el.classList.add('poof'); setTimeout(() => el.remove(), 320); });
+    sheep.length = 0;
+    foods.forEach(f => f.el.remove());
+    foods.length = 0;
+    refreshControls();
+  }
+
+  // ---- the simulation: seek (cursor or nearest food) + separation ----
+  function step(){
+    const w = W(), h = H(), maxY = h - 12;
+
+    for (const s of sheep){
+      // pick a target: nearest food wins over the cursor
+      let tx = pointer.x, ty = pointer.y, food = null, best = Infinity;
+      for (const f of foods){
+        const d = (f.x - s.x) * (f.x - s.x) + (f.y - s.y) * (f.y - s.y);
+        if (d < best){ best = d; food = f; }
+      }
+      if (food){ tx = food.x; ty = food.y; }
+
+      const dx = tx - s.x, dy = ty - s.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const ring = food ? 8 : 30;                    // gather *around* the cursor, swarm *onto* food
+      const maxSpeed = (food ? 5.4 : 4.4) * s.sp;
+
+      let ax = 0, ay = 0;
+      if (dist > ring){ ax += (dx / dist) * 0.62; ay += (dy / dist) * 0.62; }
+      else { s.vx *= 0.8; s.vy *= 0.8; }
+
+      // separation so they crowd without stacking
+      for (const o of sheep){
+        if (o === s) continue;
+        const ox = s.x - o.x, oy = s.y - o.y;
+        const od2 = ox * ox + oy * oy;
+        if (od2 > 0.01 && od2 < 34 * 34){
+          const od = Math.sqrt(od2), push = (34 - od) / 34 * 0.5;
+          ax += (ox / od) * push; ay += (oy / od) * push;
+        }
+      }
+
+      s.vx = (s.vx + ax) * 0.86;
+      s.vy = (s.vy + ay) * 0.86;
+      const spd = Math.hypot(s.vx, s.vy);
+      if (spd > maxSpeed){ s.vx = s.vx / spd * maxSpeed; s.vy = s.vy / spd * maxSpeed; }
+
+      s.x += s.vx; s.y += s.vy;
+      s.x = Math.max(10, Math.min(w - 10, s.x));
+      s.y = Math.max(NAV_H + 6, Math.min(maxY, s.y));
+
+      // eating: nibble the food this sheep is sitting on
+      if (food && dist < ring + 12){
+        s.eat = Math.min(1, s.eat + 0.06);
+        food.amount -= 0.55;
+      } else {
+        s.eat = Math.max(0, s.eat - 0.07);
+      }
+
+      // facing + liveliness (the side sheep is drawn facing right)
+      if (Math.abs(s.vx) > 0.4) s.dir = s.vx < 0 ? -1 : 1;
+      s.bob += reduce ? 0 : (0.16 + spd * 0.03);
+      const bobY = reduce ? 0 : Math.sin(s.bob) * (1.6 + spd * 0.55);
+      const tilt = reduce ? 0 : Math.max(-9, Math.min(9, s.vx * 1.3));
+      const chomp = s.eat > 0 ? Math.abs(Math.sin(s.bob * 2.2)) * s.eat * 3.2 : 0;
+      s.el.style.transform = `translate3d(${s.x.toFixed(1)}px, ${(s.y + bobY + chomp).toFixed(1)}px, 0) rotate(${tilt.toFixed(1)}deg)`;
+      s.face.style.transform = `scaleX(${s.dir})`;
+    }
+
+    // food wilts over time and shrinks as it's eaten; remove when gone
+    for (let i = foods.length - 1; i >= 0; i--){
+      const f = foods[i];
+      f.amount -= 0.18;
+      const k = Math.max(0, Math.min(1, f.amount / f.max));
+      f.el.style.opacity = k.toFixed(2);
+      f.el.firstChild.style.transform = `scale(${(0.45 + k * 0.55).toFixed(3)})`;
+      f.el.firstChild.style.transformOrigin = '50% 90%';
+      if (f.amount <= 0){ f.el.remove(); foods.splice(i, 1); }
+    }
+
+    if (!sheep.length && !foods.length){ running = false; return; }   // idle → stop burning frames
+    raf = requestAnimationFrame(step);
+  }
+
+  // ---- hint (shown once until dismissed/used) ----
+  let hintSeen = false;
+  try { hintSeen = !!localStorage.getItem('shippy-flock-hint'); } catch {}
+  function dismissHint(persist){
+    if (hint.dataset.show === '1') hint.dataset.show = '0';
+    if (persist && !hintSeen){ hintSeen = true; try { localStorage.setItem('shippy-flock-hint', '1'); } catch {} }
+  }
+
+  // ---- wiring ----
+  window.addEventListener('pointermove', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; }, { passive: true });
+
+  ctl.querySelector('.flock-fab').addEventListener('click', spawnFromFab);
+  clearBtn.addEventListener('click', clearFlock);
+  hint.querySelector('.flock-hint-x').addEventListener('click', () => dismissHint(true));
+
+  // click the page background → drop food (but never hijack real UI or a modal)
+  window.addEventListener('click', (e) => {
+    if (document.querySelector('.modal-scrim')) return;
+    if (e.target.closest('a, button, input, textarea, select, label, summary, [role="button"], [contenteditable], .flock-ctl, .flock-hint')) return;
+    if (window.getSelection && String(window.getSelection()).trim().length) return;
+    dropFood(e.clientX, e.clientY);
+  }, { passive: true });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){ if (raf) cancelAnimationFrame(raf); running = false; }
+    else ensureLoop();
+  });
+
+  // ---- kick-off: a few sheep already mingling (skipped under reduced-motion) ----
+  refreshControls();
+  if (!reduce){
+    const seedN = W() < 680 ? 3 : 5;
+    for (let i = 0; i < seedN; i++) makeSheep(rand(W() * 0.12, W() * 0.88), rand(H() * 0.35, H() * 0.7));
+    if (!hintSeen) setTimeout(() => { if (!hintSeen) hint.dataset.show = '1'; }, 1400);
+  }
+})();
 </script>
 </body>
 </html>

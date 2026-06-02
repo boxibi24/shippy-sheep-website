@@ -6,13 +6,13 @@ The marketing website for **Shippy Sheep Studio**, a low-poly game & real-time 3
 
 It's a single self-contained `index.html` — plain HTML, CSS, and vanilla JS, with **no build
 step**. Markup is generated at runtime by hand-rolled template functions, the scenery, sheep, and
-portfolio/avatar art are procedurally drawn as SVG (seeded so output is deterministic), and there's
-a tweak panel for switching between three visual themes.
+portfolio/avatar art are procedurally drawn as SVG (seeded so output is deterministic), there's a
+light/dark mode toggle, and an interactive sheep-herding minigame plays over the whole page.
 
 ## Run it locally
 
 It's a static file, but serve it over HTTP rather than opening `file://` directly (otherwise the
-CDN fonts/icons and the `localStorage`-backed tweak panel won't behave):
+CDN fonts/icons and the `localStorage`-backed light/dark preference won't behave):
 
 ```bash
 python -m http.server 8000
@@ -23,9 +23,9 @@ Any static server works (`npx serve`, the VS Code Live Server extension, etc.).
 
 ## Features
 
-- **Three themes** (Pasture / Nightfall / Wool & Paper) via the on-page tweak panel; choices persist in `localStorage`.
+- **Light / dark mode** — light is *Wool & Paper* (red accent), dark is *Nightfall* (purple accent). The sun/moon switch in the nav persists to `localStorage`, and the page honours your OS preference on first visit (no flash).
 - **Procedural low-poly art** fills the hero, portfolio cards, and team avatars — theme-aware, no image assets required (swap in real `<img>` later if you like).
-- A **walking sheep flock** that wanders left/right across the page, plus the fluffy brand sheep.
+- A **sheep-herding minigame**: a flock follows your cursor across the page; tap the floating button to spawn more sheep, and **click anywhere to drop a tuft of food** — the nearest sheep break off to munch it, then drift back. (Skipped for visitors who prefer reduced motion.)
 - **Journal articles** and **Press kit / Careers / Privacy / Terms** open in an accessible modal reader (focus trap, `Esc`/scrim close, focus restore).
 - **Contact form** wired to [Web3Forms](https://web3forms.com) with a `mailto:` fallback.
 - SEO essentials: Open Graph / Twitter / JSON-LD, `sitemap.xml`, `robots.txt`, a custom `404.html`, and a generated `og-cover.png`.
